@@ -1,0 +1,81 @@
+Name: Anirudh Veeraragavan
+
+Laboratory Log
+The first step is to download Coreutils 7.6, and we can do this by simply
+downloading the tar.gz file locally to our machine and then using the command
+scp to send it to the linux server. After it is in the linux server, we create
+a new directory, coreutilsInstall. 
+
+Now we unzip and untar the file using the command
+tar –xzvf coreutils-7.6.tar.gz This command decompresses all the files into a
+new directory called coreutils-7.6. Now we change into this new directory and
+read the INSTALL file in order to learn how to configure, make and install
+all these source files.
+
+The first step is to configure the files, and to do that we can use the command
+./configure --prefix=/w/home.13/cs/ugrad/veerarag/coreutilsInstall
+which will configure all the files and install them in the directory
+coreutilsInstall. This process takes a decent amount of time, and once it has
+finished we can use the command make to compile all of the files. Finally we
+use the command make install, and once it has finished coreutils-7.6 has been
+installed on our system.
+
+To test this we change to the directory coreutilsInstall and use the command
+./bin/ls -l, which will run the version of ls in coreutils-7.6. When we observe
+the output the dates are formatted as 2017-04-18 11:09, which is the exact
+bug that we were looking for. One thing to note is that if we had simply run
+ls -l, we would not have gotten the bug because the version of ls that was run
+would not have been the one in coreutils-7.6.
+
+Now we need to patch this bug. We do this by changing to the coreutils-7.6
+directory and using the command vim patch_file to create a new file. This file
+will contain our patch content, which we copy and paste from Brady's email.
+Now we use man patch to learn about this command, and the -pnum option. After
+doing so we use the command patch -p1 < patch_file, which will patch ls.c. The
+reason we use this command is because it will simply modify the ls.c file to
+account for the new additions, and not rewrite the whole thing.
+
+Now we type make to rebuild the patched ls.c file, and it is important to note
+that only a few files were modified because not all the files are going to be
+affected by a change to ls.c. We do not install because we do not want to
+overwrite the buggy ls file, and if we change to our home directory we can test
+the output of both.
+
+For seeing the output of the modified ls file we run the command
+./coreutils-7.6/src/ls -l, and this gives us the date formatted properly
+in traditional Unix date. For seeing the output of the buggy ls file we run the
+command ./coreutilsInstall/bin/ls -l, and this gives us the YYYY-MM-DD date
+format, which is wrong.
+
+Some sample output for the correct ls file include:
+drwxr-xr-x  2 veerarag csugrad     4096 Jan 31 12:09 test17
+-rw-r--r--  1 veerarag csugrad        0 Apr 13 10:55 test.txt
+-rw-r--r--  1 veerarag csugrad        0 Apr 11 11:11 tr
+-rw-r--r--  1 veerarag csugrad  4953680 Apr 11 14:35 words
+-rw-r--r--  1 veerarag csugrad     9316 Apr 13 11:05 words.txt
+Some sample output for the buggy ls file include:
+drwxr-xr-x  2 veerarag csugrad     4096 2017-01-31 12:09 test17
+-rw-r--r--  1 veerarag csugrad        0 2017-04-13 10:55 test.txt
+-rw-r--r--  1 veerarag csugrad        0 2017-04-11 11:11 tr
+-rw-r--r--  1 veerarag csugrad  4953680 2017-04-11 14:35 words
+-rw-r--r--  1 veerarag csugrad     9316 2017-04-13 11:05 words.txt
+
+Now we test our ls commands on files that are older than one year. We can do
+this through the touch command, and we shall change three files to be older
+than 1 year. The three commands are touch -t 201401210959.30 tr,
+touch -t 201401210959.30 words, and touch -t 201401210959.30 words.txt.
+
+Now when we run the commands we see that for the buggy output, there is no
+significant difference except the date was changed to the one specified in the
+touch command. However, for the modified ls file there is a difference as the
+year is specified for these three files. It thus appears that in traditional
+UNIX date format the year is only specified if the file is older than one year.
+
+Some output for the modified ls file:
+-rw-r--r--  1 veerarag csugrad        0 Jan 21  2014 tr
+-rw-r--r--  1 veerarag csugrad  4953680 Jan 21  2014 words
+-rw-r--r--  1 veerarag csugrad     9316 Jan 21  2014 words.txt
+Some output for the buggy ls file:
+-rw-r--r--  1 veerarag csugrad        0 2014-01-21 09:59 tr
+-rw-r--r--  1 veerarag csugrad  4953680 2014-01-21 09:59 words
+-rw-r--r--  1 veerarag csugrad     9316 2014-01-21 09:59 words.txt

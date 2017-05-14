@@ -1,0 +1,33 @@
+Name: Anirudh Veeraragavan
+
+Question 1:
+Brady removed that line in an attempt to clean up code because the line was
+duplicated right above as case long_iso_time_style:. Thus that line is not
+necessary, and removing it is also not necessary but he removed it to clean up
+the code in that switch statement a bit.
+
+Question 2:
+There are a few problems the patched version of Coreutils might pose. First of
+all in countries where the average user does not speak English they may not be
+able to understand the date format since it relies on the English spelling of
+the months. Additionally if the user is not proficient in English they may
+also not be able to recognize the abbreviations that the format uses for the
+various months. A non-English speaking user could easily confuse Jan with Jun
+and so on. Finally the version relies on the English date format of
+month-day-year, which many countries around the world do not use.
+
+Question 3:
+When this script is invoked on an empty file with a numlines parameter greater
+than 0, the script throws an IndexError since there are no lines for the
+script to choose from so it gets an out of range error. The only time this
+error does not happen is when the numlines parameter is 0, but that is
+equivalent to not doing anything.
+
+Question 4:
+The script does not work with Python 3 because of the error:
+File "randline.py", line 65
+    except IOError as (errno, strerror):
+                      ^
+SyntaxError: invalid syntax
+The script appears to be using some features of Python 2 that were deprecated
+in Python 3.
