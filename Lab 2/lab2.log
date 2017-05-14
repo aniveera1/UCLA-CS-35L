@@ -1,0 +1,153 @@
+Name: Anirudh Veeraragavan
+
+Laboratory Assignment
+After logging in, the first thing we check is whether or not we have the
+correct version of locale. After running the command locale we see that we do
+not, therefore, we use the command export LC_ALL='C' to change to the standard
+C locale. Now when we run the command locale, we see we have the correct
+version.
+
+Next we need to create a file words that has a sorted list of English words. We
+change to the directory /usr/share/dict and run the command sort -d words >
+~/words which will sort the file words and redirect the sorted content to
+another file named words in our home directory. Examining the file ~/words
+shows that it is indeed a sorted list of English words.
+
+Now we need to obtain the necessary HTML, and to do that we use the command
+wget http://web.cs.ucla.edu/classes/spring17/cs35L/assign/assign2.html, which
+creates a file named assign2.html.1 which holds our HTML. Now we run some
+commands on that text file and the outputs are described below.
+
+The first command is tr -c 'A-Za-z' '[\n*]' < assign2.html.1. This command will
+output the contents of assign2.html.1 except whenever a nonalpha character
+appears in assign2.html.1 it is replaced by a newline. This is because the
+first set consists of all alpha characters, -c takes the complement of that
+set which results in the set of all nonalpha characters, and then it is
+replaced by the second set which consists of newlines.
+
+The second command is tr -cs 'A-Za-z' '[\n*]' < assign2.html.1. This command
+will output the contents of assign2.html.1 except whenever a nonalpha character
+appears in assign2.html1, it is replaced by a newline. The difference from the
+previous command is that repeats are ignored so even if multiple nonalpha
+characters are between two alpha characters, it will only result in one
+newline. This is because of the change from -c to -cs, where s is the option
+to ignore repeats.
+
+The third command is tr -cs 'A-Za-z' '[\n*]' < assign2.html.1 | sort. This
+command will essentially output all the words of assign2.html.1 in alphabetic
+order with a newline separating each word. The difference between this command
+and the previous command is that the output from this command is alphabetized.
+This happens because the output from the tr command is then pipelined into the
+sort command, which then sorts the output and send it to standard output.
+
+The fourth command is tr -cs 'A-Za-z' '[\n*]' < assign2.html.1 | sort -u. This
+command will output all the words of assign2.html.1 in alphabetic order with a
+newline separating each word and ignoring repeats. The difference between this
+command and the previous command is that this command will only output each
+word once and ignore any repeats. This happens because the option -u is
+enabled for sort, which stands for unique.
+
+The fifth command is tr -cs 'A-Za-z' '[\n*]' < assign2.html.1 | sort -u
+| comm - words. This command will output three columns where the first column
+contains words unique to assign2.html.1, the second column contains words
+unique to words, and the third column contains words that exist in both
+assign2.html.1 and words. This is because the output from the fourth command
+gets pipelined into the comm command, which compare the output line by line
+with the words file.
+
+The sixth command is tr -cs 'A-Za-z' '[\n*]' < assign2.html.1 | sort -u |
+comm -23 - words. This command will output one column which contains words
+unique to assign2.html.1. The difference between this command and the previous
+command is that the second and third column are supressed in this command, so
+the only thing outputed are words unique to assign2.html.1. This is because of
+the -23 option, which indicates that columns 2 and 3 are to be supressed.
+
+Now we need to create our Hawaiian dictionary. The first step is the obtain the
+web page, and we can do this with the command wget
+http://mauimapp.com/moolelo/hwnwdseng.htm which will create a file named
+hwnwdsend.htm that holds the HTML content of that page. Viewing this file
+with emacs shows that it does indeed hold all the HTML content. Now we need to
+write our shell script buildwords, which will extract the words from the HTML
+page and sort them to form our dictionary.
+
+My shell script uses three commands grep, sed, and sort. Grep is used for
+extraction, sed is used for deletion and manipulation, and sort is used for
+finally sorting the list and removing any duplicates.
+
+The first command
+grep -E '<td>.+<\/td>' | \ grabs all the words from the HTML
+file and pipes it to the next command. 
+
+The next command
+sed -n '1~2!p' | \ deletes the first line and then every other line afterwards
+in order to make sure that only Hawaiian words are remaining.
+
+The next three commands
+sed 's/    <td>//g' | \
+sed 's/<\/td>//g' | \
+sed 's/<u>//g; s/<\/u>//g' | \ will first delete the leading spaces, the <td>
+and </td> tags, and the <u> and </u> tags. This ensures that only the words are
+remaining with no HTML tags.
+
+The next command
+sed -e "s/\`/\'/g" | \ replaces all the ` with ', as required by the spec.
+
+The next two commands
+sed -e "s/\,/\n/g" | \
+sed -e "s/ /\n/g" | \ replace any commas and blankspaces with new lines.
+
+The next command
+sed '/^$/d' | \ deletes any unnecessary blank lines that may be between words.
+
+The next command
+sed -e 's/\(.*\)/\L\1/' | \ lowercases all characters.
+
+The next two commands
+sed '/b\|c\|d\|f\|g\|j\|q\|r\|s\|t\|v\|x\|y\|z/d' | \
+sed "/[^a-z^A-Z^\']/d" | \ delete any lines that contain a non-Hawaiian
+character or a non-alpha character excluding '.
+
+The final command
+sort -u sorts the words and removes any duplicates.
+
+My buildwords script reads from STDIN and outputs to STDOUT, and after
+writing it I changed its permission using the command chmod u+x buildwords,
+which allows users to now use the script.
+
+Now we can create our Hawaiian dictionary, and we do so by using our buildwords
+script with the webpage we obtained earlier as follows:
+./buildwords < hwnwdseng.htm > hwords. This will create a file hwords, which
+is our Hawaiian dictionary.
+
+Now we can modify the shell command to check against the Hawaiian dictionary
+by changing it to tr -cs "pk\'mnwlhaeiou" '[\n*]' | sort -u | comm -23 -
+hwords, and we have our Hawaiian spell checker command. We can check our work
+by running the command against the assignment web page.
+
+First we use the command wget
+http://web.cs.ucla.edu/classes/spring17/cs35L/assign/assign2.html to get a copy
+of the HTML. Then we use the command tr '[:upper:]' '[:lower:]' <
+assign2.html.1 to lowercase all the Hawaiian words and pipe this into our
+spell checker command. Thus the entire command is as follows: 
+tr '[:upper:]' '[:lower:]' < assign2.html.1 | tr -cs "pkmnwlhae'iou" "[\n*]" |
+sort -u | comm -23 - hwords | wc. The wc command simply counts the number of
+words, so that we do not have to spend time doing so ourself. So we see that
+when running the Hawaiian spell checker on this web page, we have 197 mispelled
+words.
+
+Now we can run the Hawaiian spell checker on our Hawaiian dictionary itself,
+hwords. This is a bit of a test to make sure that our spell checker is working
+properly. To do so, we run the command tr '[:upper:]' '[:lower:]' < hwords |
+tr -cs "pkmnwlhae'iou" "[\n*]" | sort -u | comm -23 - hwords | wc. When doing
+so, we have 0 mispelled words indicating that our spell checker is most likely
+working properly.
+
+Now we can run the English spell checker on the web page. We use the command
+tr '[:upper:]' '[:lower:]' < assign2.html.1 | tr -cs 'A-Za-z' '[\n*]' | sort -u
+| comm -23 - words | wc. This indicates that there are 38 mispelled English
+words. Thus in total for the web page we have 197 mispelled Hawaiian words and
+38 mispelled English words.
+
+There are several words mispelled in English but not in Hawaiian. These words
+include lau and halau. There are also some words mispelled in Hawaiian but not
+in English. These words ample, hell, and mail.

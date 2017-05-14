@@ -1,0 +1,67 @@
+#!/bin/bash
+#sameln --- Replaces all duplicate files with hard links
+#Name: Anirudh Veeraragavan
+
+dir=$1
+#Get the directory
+RESULT=`ls -a $dir | sort`
+#Sort the files in the directory
+IFS=$'\n'
+#Make sure files with spaces are noticed
+declare -a DOTSARRAY
+#Array to hold files with a .
+declare -a FILEARRAY
+#Array to hold all other files
+let dotCount=0
+#Count for the DOTSARRAY
+let count=0
+#Count for FILEARRAY
+for FILE in $RESULT
+#Loop through the directory contents
+do
+    if [ ! -r "$dir/$FILE" ]
+    #If the file has no read permissions, throw error
+    then
+	  echo "ERROR: You cannot read $dir/$FILE"
+    fi
+    if [[ ! -L "$dir/$FILE" && -r "$dir/$FILE" ]]
+    #Make sure file is not symbolic and readable
+    then
+	  if [ -f "$dir/$FILE" ]
+	  #Make sure it is a regular file
+	  then
+	    if [ "${FILE:0:1}" == "." ]
+	    #If the file begins with a . store in DOTSARRAY
+	    then
+		  DOTSARRAY[$dotCount]="$dir/$FILE"
+		  let dotCount=dotCount+1
+	    else
+		  FILEARRAY[$count]="$dir/$FILE"
+		  #Else store in FILEARRAY
+		  let count=count+1
+	    fi
+	  fi
+    fi
+done
+DOTSARRAY=("${DOTSARRAY[@]}" "${FILEARRAY[@]}")
+#Concatenate two arrays so all . files are at the beginning
+#and the others are behind it
+let count=${#DOTSARRAY[@]}
+#Let the overall count be the size of the full array
+exec 2>/dev/null
+for (( i=0; i<$count; i++ ))
+#We have two nested for loops to compare each element with all
+#the elements in the array
+do
+    for (( j=$i+1; j<$count; j++ ))
+    do
+	  compare=$(cmp -s -- "${DOTSARRAY[$i]}" "${DOTSARRAY[$j]}")
+	  #Compare the files
+     	  if [ ! $compare ]
+	  #If the comparison returns 0 (no difference)
+          then
+	   ln -f -- "${DOTSARRAY[$i]}" "${DOTSARRAY[$j]}"
+           #Create a hardlink
+	  fi
+     done
+done

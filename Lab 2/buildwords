@@ -1,0 +1,31 @@
+#! /bin/bash
+# buildwords --- extract Hawaiian words from an HTML file, lowercase them,
+and sort them
+# Name: Anirudh Veeraragavan
+
+# extract all words in table
+grep -E '<td>.+<\/td>' | \
+#delete all English words
+sed -n '1~2!p' | \
+#delete spaces in front and <td> tag
+sed 's/    <td>//g' | \
+#delete </td> tag
+sed 's/<\/td>//g' | \
+#delete <u> and </u> tag
+sed 's/<u>//g; s/<\/u>//g' | \
+#replace ` with '
+sed -e "s/\`/\'/g" | \
+#replace , with newline
+sed -e "s/\,/\n/g" | \
+#replace space with newline
+sed -e "s/ /\n/g" | \
+#delete any blank lines
+sed '/^$/d' | \
+#lowercase everything
+sed -e 's/\(.*\)/\L\1/' | \
+#delete any lines containing non-Hawaiian characters
+sed '/b\|c\|d\|f\|g\|j\|q\|r\|s\|t\|v\|x\|y\|z/d' | \
+#delete any lines containg non-alpha characters excluding '
+sed "/[^a-z^A-Z^\']/d" | \
+#finally sort
+sort -u
