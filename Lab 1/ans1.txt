@@ -1,0 +1,118 @@
+Laboratory Questions
+Question 1
+You can get man to print out all the commands that have a keyword
+in their man page by using the command man -k keyword where keyword
+is the specified word you would like to search for. I used the command man man
+to solve this problem, by visiting the manual description page to
+find the -k command.
+
+Question 2
+The cp program is located in /usr/local/cs/bin/cp and the
+wc program is located in /usr/local/cs/bin/wc. I first used the command
+man -k where to find all the relevant manual pages, which allowed me to
+learn about the which command. After reading about the command, I
+then used which cp and which wc in order to find the programs in the
+file system.
+
+Question 3
+The one character programs are
+:  No effect, simply expands arguments and performs redirections
+.  Read and executes commands from a file in the current shell
+w  Show who is logged on and what they are doing
+[  Evaluate conditional expressions
+I determined this by using the command man find to learn about the find command,
+and then by using the command find /usr/bin "?". Then I used the manual pages
+to learn about each command.
+
+Question 4
+The file that is actually executed by the symbolic link /usr/bin/emacs is
+/etc/alternatives/emacs. I first used the command man -k symbolic to first
+find any commands that would help me in determining the contents of a
+symbolic link. Then I used the command man readlink to learn about this
+command, and by using the command readlink emacs, I was able to
+determine the file that is actually executed.
+
+Question 5
+The symbolic mode g+s gives gives the person accessing the file the
+permission of a group for that file and o-x removes execute permission
+from other users not in the file’s group. I first used the command man
+chmod to learn about the command, and by reading the description I was
+able to figure out what this symbolic mode did.
+
+Question 6
+The option to find that lets you search for files modified in the last three
+weeks is -ctime -21. I used the command man find to learn about the find
+command, and by reading the expressions section I was able to figure out how
+to search for files within a specified time frame.
+
+Question 7
+There are many directories that were modified in the last three weeks. I first
+used the command cd / in order to get to the root directory since I would have
+to use the find command from the root directory to find all relevant
+directories. Then I used the command find -type d -ctime -21, to find all
+directories modified in the last three weeks.
+
+Question 8
+There are 247 symbolic links in the same directory as find. I first changed to
+the /usr/bin directory and used the command ls -l. Then I copied all the files
+that started with l, which deonates a symbolic link, and counted how many links
+existed.
+
+Question 9
+The oldest regular file is libfreeblpriv3.so. I first used the man ls command
+to learn about the -lt option, and then used the command ls -lt and looked for
+the first oldest regular file.
+
+Question 10
+The locale command gets its data based on the settings on the environment
+variables that control the locale. I used the command man locale in order to
+learn about this.
+
+Question 11
+The commands with sort in their name are:
+Buffer-menu-sort
+sort-columns
+sort-fields
+sort-lines
+sort-numeric-fields
+sort-pages
+sort-paragraphs
+sort-regexp-fields
+tabulated-list-col-sort
+tabulated-list-sort
+I first used the command C-h a to search for commands in emacs through keyword
+and then searched for sort.
+
+Question 12
+The keystrokes actions are as follows
+C-M-a beginning-of-defun: Move back to the beginning of a defun
+C-M-b backward-sexp: Move back one balanced expression
+C-M-c exit-recursive-edit: Exit from the innermost recursive edit or minibuffer
+C-M-d down-list: Move forward one level of parantheses
+C-M-e end-of-defun: Move forward to end of defun
+C-M-f forward-sexp: Move forward one balanced expression
+C-M-h mark-defun: Put mark at end of this defun, point at beginning
+I first used the command C-h b and then scrolled down to the section containing
+these commands and read about all of them.
+
+Question 13
+The Emacs keystroke C-g quits a command by either getting rid of a partially
+typed command or stopping a running command in a safe way. I first used the
+command emacs to start the application, and then C-h r to access the Emacs
+manual. Then I used C-v to scroll down to the key index, and within the key
+index I used the command again to scroll to the description page for C-g.
+
+Question 14
+The yank function reinserts text that was previously killed. The basic yanking
+command inserts the most recent kill and leaves the cursor at the end of the
+inserted text. I first used the command emacs to start the application, and
+then C-h r to access the Emacs manual. Then I used C-v to scroll down to the
+command index, and within the command index I used the command again to scroll
+to the description page for yank.
+
+Question 15
+The difference is that the emacs dired command also gives us the current and
+parent directory information whereas ls -l does not. I determined this by first
+changing directories to /usr/bin and then running the command ls -l to get the
+first output. Then I ran the commands emacs, C-h b, C-s dired, C-x d to get the
+second output and compared them together.
