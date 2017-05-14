@@ -1,0 +1,100 @@
+Name: Anirudh Veeraragavan
+
+Laboratory Log
+The first step is to build the old version of coreutils, and we can do
+this by first downloading the tarball to our local machine and then
+using the scp command to copy it over to the linux server. Then we use
+the command tar -xzvf coreutils-with-bug.tar.gz to unzip the tarball
+into its own directory called coreutils-with-bug.
+
+Now we can start the process of building this old version of coreutils.
+However, after configuring the files I ran into an error while trying to
+build them. The error was:
+In file included from utimecmp.c:41:0:
+utimens.h:2:5: error: conflicting types for 'futimens'.
+It appears that some function was being redefined, and as a result the
+file was not able to compile correctly.
+
+This is where the renaming patch comes in as it provides a new name for
+the function that was being redfined and changes all previous calls to
+the old function name to the new function name. First I copy the patch
+content over to a new file, and use the command patch -p1 < patch_file
+to patch the incorrect files.
+
+Now the files are able to compile correctly and I can successfully make
+and make install them. Since the build has now been created, we can try
+to reproduce the time stamp problem as described in the spec.
+
+First we change to the directory in which we installed the old version
+of coreutils and we create three files for testing this bug. Then we use
+the touch command to give each of the three files an old date in the
+year 1918. Then we use the ls -lt command, and we see that in the output
+the files are given the date Dec 17 2054, which is clearly not the date
+we had assigned in 1918. The specific output is below:
+-rw-r--r-- 1 veerarag csugrad 0 Dec 17  2054 test1
+-rw-r--r-- 1 veerarag csugrad 0 Dec 17  2054 test2
+-rw-r--r-- 1 veerarag csugrad 0 Dec 17  2054 test3
+
+Thus we have confirmed that the bug does exist, and we now have to
+figure out a way to fix it. We can use gdb for this, and the first step
+is to change to the src directory of coreutils-with-bug so that we can
+use gdb on the ls executable. We are interested in the execution of
+ls -lt on files with extremeley old dates, so first we create a temp
+file and use touch to give it an old date. Then we can use the command
+gdb --args ls -lt temp.c to run gdb on the ls command with specific
+arguments specified, and we enter the gdb environment. First we should
+check whether the bug still exists using the command run, and we see
+that indeed the bug is still there as the file is given a date of
+2054-12-17.
+
+Then we use the command info functions to see all the functions and we
+notice three interesting ones compare_atime, compare_ctime, and
+compare_mtime. We set breakpoints at these three functions using the
+command break <function_name> and use run to start execution. We break
+at the line func = sort_reverse ? rev_cmp_mtime : compare_mtime; so now
+we know that the function being used in compare_mtime. We use the
+command step to see what this function is doing, and we get taken to
+the file timespec.h and the function timespec_cmp.
+
+timespec_cmp (struct timespec a, struct timespec b)
+{
+  int diff = a.tv_sec - b.tv_sec;
+  return diff ? diff : a.tv_nsec - b.tv_nsec;
+}
+
+The problem becomes clear from this function. It relies on subtraction,
+which means overflow could happen which would lead to incorrect dates
+being printed to the screen. Time is represented on machines as the
+number of seconds from Unix Epoch time. Thus an old date would have
+relatively fewer seconds than a newer date, and if this older date was
+in a.tv_sec and a newer date was in b.tv_sec we would have a negative
+number. A sufficiently large difference could lead to overflow, and in
+our case that is why the old date gets printed out as a date in the
+future.
+
+The comment above this function says /* Return negative, zero, positive
+if A < B, A == B, A > B, respectively. */ Thus to fix this we simply
+use an if statement which relies on comparison instead of subtration,
+and which will return either -1, 0, or 1. The new function is below:
+
+timespec_cmp (struct timespec a, struct timespec b)
+{
+  if (a.tv_sec < b.tv_sec) return -1;
+  else if (b.tv_sec < a.tv_sec) return 1;
+  return 0;
+}
+
+Now we need to create our patch file. We can do this by changing to the
+directory where timespec.h is and copying that file into a new one
+called temptimespec.h. Then we edit temptimespec.h to reflect the
+changes above, and use the command diff -u timespec.h temptimespec.h >
+lab4.diff to generate our diff file. Then I did a quick Google search
+to learn about the GNU style of change log entries, and used emacs to
+add a change long entry above the patch.
+
+Then I changed back to my home directory to test this bug on the SEASnet
+server. I used the touch command on one of my files, and when I use the
+command ls -lt I see that the bug does persist on the SEASnet server.
+Specifically, I modified my file leak.cpp and the command
+ls -lt leak.cpp yields the following output:
+-rw-r--r-- 1 veerarag csugrad 30879 Dec 17  2054 leak.cpp.
