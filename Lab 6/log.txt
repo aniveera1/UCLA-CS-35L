@@ -1,0 +1,37 @@
+Laboratory Log
+Name: Anirudh Veeraragavan
+
+In this lab we are investigating how multiple threads can improve performance. The first
+step is to ensure we are using the correct version of sort that has multithreading
+functionality. We can do this by running the command /usr/local/cs/bin/sort --version,
+and we see that we are runnning the latest version of sort from 2017. Now we have to
+generate a file of 10000000 random single-precision floating point numbers using
+/dev/urandom. We can use the command od with the option -N to specifiy the number of
+bytes we want from /dev/urandom. The number of bytes in a file with 10000000 floating
+point number each with a new line is 17777775, so the command od -N 17777775 /dev/urandom
+will give us all the numbers we need.
+
+Now we have to remove all the white space and replace them with newlines. This can
+easily be done through the command tr ' ' '\n'. Thus the entire command to generate the
+file is od -N 17777775 /dev/urandom | tr ' ' '\n' and we can redirect that to a file
+values.txt. After we can use the command wc -l values.txt to check whether values.txt
+actually has 10000000 lines or not, and we see that it does, so we have successfully
+made the file.
+
+Now we can time how long sort takes without multithreading. We use the command
+time -p /usr/local/cs/bin/sort -g values.txt > /dev/null, and we get the following
+timestamps: real 9.38, user 48.07, and sys 0.43. Now we can test how long sort takes
+with multithreading. We can use the command time -p /usr/local/cs/bin/sort -g
+--parallel=1 values.txt > /dev/null, and replace the value for parallel with 2, 4, and 8
+to see how changing the number of threads affects performance. All the results follow:
+
+       No Parallel  	Parallel=1	  Parallel=2	       Parallel=4      Parallel=8
+real   9.58		42.02		  23.32		       14.42	       9.40	
+user   48.03		41.85		  44.13		       46.15	       47.87
+sys    0.39		0.17		  0.19		       0.31	       0.42
+
+It appears that even without specifying the parallel option sort still runs on
+multiple threads since the performance with nothing specified and with 8 specified were
+nearly identical. Other than that it appears that adding more threads does increase
+performance, and we can clearly see real time decreasing as more threads are added. Also
+system time appears to increase as more threads are added.
