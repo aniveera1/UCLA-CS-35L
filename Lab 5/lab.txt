@@ -1,0 +1,43 @@
+Lab Log
+Name: Anirudh Veeraragavan
+
+For this lab we are comparing how buffered I/O has better performance than
+unbuffered I/O. The first step is to create our two files tr2b.c and tr2u.c,
+which use library functions and system calls respectively. The file tr2b.c was
+fairly straightforward to create since it simply relies on library functions,
+which we used last week. The file tr2u.c was a bit more challenging and I had
+to use online documentation in order to understand how system calls worked.
+
+After creating the programs I then tested both of them to ensure that all the
+necessary functionality was present. After ensuring this requirement, I then
+started comparing the performance. The first step was to create a file of
+5000000 bytes, and I did this by writing a C program that uses putchar
+5000000 times and redirecting this output to a file. Then I used strace on
+both programs for the two scenarios: copying one file to another and copying
+a file to terminal. The commands are as follows, strace -c ./tr2b < values.txt >
+temp.txt and strace -c ./tr2b < values.txt, where values.txt is the file I
+created in the previous step. Using these command yields the following output:
+
+	   Copying one file to another	 	 Copying to terminal
+tr2b	   29 system calls     			 32 system calls
+tr2u	   10485786 system calls		 10485793 system calls
+
+Thus we clearly see that buffered I/O makes fewer system calls than unbuffered
+I/O. This makes sense since unbuffered I/O reads in bytes one at a time, which
+would take a long time. Additionally we notice that it takes more system calls
+to copy to terminal than to another file in both instances. We can now test
+speed by using the time command. The commands are as follows, time ./tr2b <
+values.txt > temp.txt and time ./tr2b < values.txt. Using these commands
+yields the following output:
+
+       	   Copying one file to another	       	 Copying to terminal
+tr2b	   real	   0.004s      			 0.002s
+	   user	   0.001s			 0.000s
+	   sys	   0.000s			 0.001s
+tr2u	   real	   6.025s			10.653s
+	   user	   0.301s			 0.402s
+	   sys	   5.609s			 5.827s
+
+Thus we can conclude that getchar and putchar are significantly more efficient
+than using just system calls. This is because they use buffered I/O, and as a
+result fewer system calls are made, which leads to a faster runtime.

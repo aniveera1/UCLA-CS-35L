@@ -1,0 +1,37 @@
+Performance Comparison
+Name: Anirudh Veeraragavan
+
+The first comparison is between sfrob and sfrobu on inputs of varying
+input lines. The two inputs I used were two files, input1.txt and
+input2.txt, which contained 355 and 424 input lines respectively. I used
+the time command to measure how long each program took, and the results
+are as follows:
+		input1.txt		input2.txt
+sfrob	real	0.003s			0.005s
+	user	0.001s			0.003s
+	sys	0.001s			0.002s
+	
+sfrobu	real	0.010s			0.015s
+	user	0.003s			0.002s
+	sys	0.007s			0.011s
+
+Thus we can clearly see that sfrob runs faster than sfrobu. Furthermore
+we can use the strace command to estimate the number of comparisons
+as a function of input lines. For sfrobu it appears to be a one-to-one,
+which makes sense since every byte is being read one at a time. For sfrob
+it appears to be roughly 1 comparison for every 3500 characters; however,
+this does not really hold for files of small characters.
+
+The last comparison is between sfrob, sfrobu, sfrobs, sfrobu -f, and
+sfrobs -f. For this comparison I will simply use one input file and
+measure how long each variation takes. The results are as follows:
+
+	sfrob	   sfrobu     sfrobs     sfrobu -f     sfrobs -f
+real	0.003	   0.008      0.008	 0.008	       0.006
+user	0.001	   0.001      0.003	 0.003	       0.002
+sys	0.001	   0.006      0.007	 0.005	       0.006
+
+Thus we can clearly see that sfrob is the fastest. Additionally while the
+-f flag makes no real difference for sfrobu, it appears to make sfrobs
+run slighty faster. Finally sfrobu and sfrobs appear to run at a similar
+speed.
