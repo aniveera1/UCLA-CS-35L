@@ -1,0 +1,31 @@
+Laboratory Log
+Name: Anirudh Veeraragavan
+
+The first step was to install Ubuntu on a computer in the seasnet laboratory in order to
+set up the necessary environment. I had to repeat this process on a different computer
+since my original computer was having problems connecting to Ethernet. After installing
+Ubuntu, the next step was to check whether I had openssh-server and openssh-client
+installed or not. I checked this through the command dpkg --get-selections | grep
+openssh, which gave me the output openssh-client install. Since the command did not
+output openssh-server install, I had to run the command sudo apt-get install
+openssh-server. Afterwards I ran the command dpkg --get-selections | grep opensshagain
+and all the output was correct, indicating that the environment was now correctly setup.
+
+Now we can start the process of setting up an account on my team member's computer. For
+this lab I was the client and my partner was the server. Thus the first steps were my
+partner's responsibility as he had to set up an account for me in the .ssh directory and
+give me permission. Afterwards it was my responsibility to proceed, and the first thing
+I did was generate my public and private keys using the command ssh-keygen. Then I copied
+my public key over to the server, and my user name was new and the server ip address was
+10.97.85.53. Thus the command I used was ssh-copy-id -i new@10.97.85.53. Then I used the
+command ssh-add to add my private key to the authentication agent, and this finished the
+setup.
+
+Everything worked as expected, and the command ssh new@10.97.85.53 allowed me to connect
+to the remote server. Furthermore in ~/.ssh/known_hosts there was one entry, which
+corresponds to the one server I have authenticated with. 
+
+The final step was to determine whether port forwarding was working. I tested this with
+the command ssh -X new@10.97.85.53, and by running commands xterm, gedit, and firefox I
+was able to see the windows on my computer. Thus port forwarding was also working as
+expected, and thus we had successfully completed the lab.
