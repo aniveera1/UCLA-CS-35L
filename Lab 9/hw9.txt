@@ -1,0 +1,57 @@
+Homework Log
+Name: Anirudh Veeraragavan
+
+The first step is to check out version 3.0 into a new branch called "quote". We can do
+this through the command git checkout v3.0 -b quote, from within the diffutils
+directory. Then I installed my patch through the command patch -p1 <
+quote-3.0-patch.txt, which had the following output:
+
+patching file src/cmp.c
+patching file src/context.c
+patching file src/diff.c
+patching file src/diff3.c
+patching file src/dir.c
+patching file src/sdiff.c
+patching file src/util.c
+
+This indicates that the patch process was successful. Then I opened quote-3.0-patch.txt
+in Emacs, and used the command C-x 4 a in order to write a ChangeLog entry. I then
+committed this change to the branch using the command git commit -F ChangeLog, so that
+the ChangeLog entry was the commit message.
+
+Now we have to generate our formatted patch. To do this, the first step is to determine
+the hex value for my commit, which I found out through git log was
+c2f0b3d763064438ad846661ced8770f6303b79c. I then used the command git format-patch -1
+--stdout c2f0b3d763064438ad846661ced8770f6303b79c > formatted-patch.txt, and this
+created the file formatted-patch.txt, which is my patch.
+
+I then emailed this over to my partner, and he emailed me his patch for the next part.
+The first step was to use the command git checkout v3.0 -b partner, to create a new
+branch for testing the patch. I then copied his patch over, and used the command
+git am < formatted-patch.txt. This worked succesfully, and through git log I was able to
+view the contents of his patch which are below:
+
+commit dca3bc0b09ea30f6afc975bdd4f5e5a13a29b4da
+Author: Rahul Sameer Sheth <sheth@lnxsrv07.seas.ucla.edu>
+Date:   Thu Jun 1 15:05:04 2017 -0700
+
+    2017-06-01 Rahul Sameer Sheth <sheth@lnxsrv07.seas.ucla.edu>
+
+        * quote-3.0-patch.txt:
+        * src/cmp.c: Changing all of the "`" to "'" and """
+        * src/diff.c: Changing all of the "`" to "'" and """
+        * src/diff3.c: Changing all of the "`" to "'" and """
+        * src/dir.c: Changing all of the "`" to "'" and """
+        * src/sdiff.c: Changing all of the "`" to "'" and """
+        * src/util.c: Changing all of the "`" to "'" and """
+
+Now I can build the system through the commands ./bootstrap, ./configure, and make. Then
+I run make check to ensure everything is working as expected. Finally to confirm
+everything has worked, I used the command make distdir, which creates a directory that
+contains my partner's patch. I then view the ChangeLog, and get the same output as the
+log, which confirms that my partner's patch was successful.
+
+The final step was to obtain the gitk screenshot and write the description. To do this
+I first logged into the linux server with the -X option, and then ran gitk within the
+directory ~eggert/src/gnu/emacs. This opened up a window, and I then took a screenshot
+and wrote the description.

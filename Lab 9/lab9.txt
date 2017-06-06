@@ -1,0 +1,108 @@
+Lab Log
+Name: Anirudh Veeraragavan
+
+The first step is to get the Diffutils repository in git format. We can do this in the
+linux server by first creating a new directory gitroot, and then running the command
+git clone https://git.savannah.gnu.org/git/diffutils.git within the directory. This
+creates a new directory, diffutils, which contains the Diffutils repository. We then
+change into this directory in order to fulfill the next steps.
+
+To get the log of changes we can use the command git log, and we redirect the content
+to a file git-log.txt. To get the list of tags we can use the command git tag, and we
+redirect the content to a file git-tags.txt. Now to generate the patch for the commit,
+we first need to find the hash for the commit. We can do this by searching the file
+git-log.txt for maint: quote 'like this' or "like this", not `like this'. Once we get
+the hash, we can use the command git show and redirect the output to quote-patch.txt.
+
+Now we check out version 3.0 using the command git checkout v3.0 -b diffutils, and we
+can then apply the patch from within the diffutils folder using the command patch -p1
+< quote-patch.txt. We run into a few errors while runnning this command, and the
+following hunks failed:
+
+patching file src/diff.c
+Hunk #10 FAILED at 876.
+Hunk #11 FAILED at 906.
+Hunk #12 FAILED at 942.
+3 out of 14 hunks FAILED -- saving rejects to file src/diff.c.rej
+
+patching file src/diff3.c
+Hunk #6 FAILED at 433.
+1 out of 9 hunks FAILED -- saving rejects to file src/diff3.c.rej
+
+We run git status to see what happened, and find out the following files were changed:
+       	modified:   NEWS
+	modified:   README
+	modified:   TODO
+	modified:   doc/diagmeet.note
+	modified:   ms/config.bat
+	modified:   ms/config.site
+	modified:   po/en.po
+	modified:   src/analyze.c
+	modified:   src/cmp.c
+	modified:   src/context.c
+	modified:   src/diff.c
+	modified:   src/diff.h
+	modified:   src/diff3.c
+	modified:   src/dir.c
+	modified:   src/ifdef.c
+	modified:   src/io.c
+	modified:   src/sdiff.c
+	modified:   src/side.c
+	modified:   src/system.h
+	modified:   src/util.c
+	modified:   tests/help-version
+
+Now we need to revert the changes we do not want. We do not want any changes to files
+that do not end in .c, and we can do this through the emacs commands vc-diff and
+vc-revert. First we open up the respective files in emacs, use the command C-x v =
+to open the diff buffer, and then the command C-x v u to revert all changes. We do
+this process to the files NEWS, README, TODO, doc/diagmeet.note, ms/config.bat,
+ms/config.site, po/en.po, src/diff.h, src/system.h, and tests/help-version.
+
+Now we need to revert all the changes in the .c files, except changes to the source
+code. We will have to do this by hand, by going through each hunk in the diff buffer
+and determining whether to keep or discard the hunk. The command for keeping is C-c
+C-a, and for discarding is C-u C-c C-a. Thus we end up modifying the files
+src/analyze.c, src/cmp.c, src/context.c, src/diff.c, src/diff3.c, src/dir.c,
+src/ifdef.c, src/io.c, src/sdiff.c, src/side.c, and src/util.c.
+
+There are two files left to examine, diff3.c.rej and diff.c.rej. The patch command
+was unable to apply these patches, so we have to manually inspect them and determine
+whether they should be added to the source code or not. Furthermore we have to
+determine the correct place to add these patches.
+
+Now we use git status to see what files were actually modified, and they are as
+follows:
+	modified:   src/cmp.c
+	modified:   src/diff.c
+	modified:   src/diff3.c
+	modified:   src/dir.c
+	modified:   src/sdiff.c
+	modified:   src/util.c
+Then we use git clean -f to remove all files that are untracked. Git status now only
+reports six modified files, and we use the command git diff to put this patch into a
+file called quote-3.0-patch.txt.
+
+We now start the build process. First we run the command ./bootstrap, and since we
+are using a newer version of lnxsrv we have to apply another patch. We copy the patch
+into a file diffutils-gets.diff, and then run the command
+patch -p0< diffutils-gets.diff. Now we can finish the build process by running the
+commands ./configure and make.
+
+Finally we now have to verify that diffutils has correct behavior. We first run the
+command diff . -, and notice that the error message does not use ` anymore,
+"diff: cannot compare '-' to a directory". Then we run diff --help, and notice that
+` is not used anywhere, "FILES are 'FILE1 FILE2' or 'DIR1 DIR2' or 'DIR FILE...' or
+'FILE... DIR'."
+
+Now we can run a sanity check, by using the just built diff command to compare the
+source code of Diffutils 3.0 against the source code of modified Diffutils. We do
+this by copying the modified source code to a directory diffutils-3.0-patch and using
+git checkout to get the unmodified source code in a directory diffutils-3.0. Then
+we use the command diffutils-3.0-patch/diff -pru diffutils-3.0 diffutils-3.0-patch >
+quote-3.0-test.txt to use the just built diff to do the comparison. It works properly,
+and when we compare quote-3.0-test.txt against quote-3.0-patch.txt, the only
+differences are in the usage of ` versus '. Thus the differences are innocuous, and
+we conclude that our patch successfully meets the requirements of replacing all ` with '.
+
+

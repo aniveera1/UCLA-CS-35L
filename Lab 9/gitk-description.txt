@@ -1,0 +1,11 @@
+Gitk Description
+Name: Anirudh Veeraragavan
+
+The top window displays the commit graph, and has information regarding the
+history of the commits and the various branches, the owner of each commit, and
+the time it was merged to the main branch.
+
+The bottom right window displays the files impacted by the currently selected
+commit. The bottom left window from top to bottom first diplays the SHAI ID,
+then information about the commit including Author, Committer, Parent, Child,
+etc, and then the file changes are present in diff format.
